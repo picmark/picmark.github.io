@@ -73,7 +73,7 @@
 
     <br/>
     <div class="mdui-bottom-nav">
-        <a class="mdui-btn" href="https://github.com/picmark/picmark.github.io">访问源码</a>
+        <a class="mdui-btn" href="https://github.com/picmark/picmark.github.io" target="_blank">访问源码</a>
     </div>
 
 </div>
@@ -131,8 +131,8 @@
                 picViewDiv.empty()
                 picViewDiv.append(`<img class="mdui-img-fluid mdui-img-rounded" src="${res.jsdelivr}"/>`)
                 picUrlDiv.empty()
-                picUrlDiv.append(`<p>Github: <a href="${res.github}">${res.github}</a></p>`)
-                picUrlDiv.append(`<p>JsDelivr: <a href="${res.jsdelivr}">${res.jsdelivr}</a></p>`)
+                picUrlDiv.append(`<p>Github: <a href="${res.github}" target="_blank">${res.github}</a></p>`)
+                picUrlDiv.append(`<p>JsDelivr: <a href="${res.jsdelivr}" target="_blank">${res.jsdelivr}</a></p>`)
             }
             console.log(res)
         } finally {
