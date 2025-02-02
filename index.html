@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=5.0">
+    <meta name="description" content="PicMark 多源极简图床 本地/私有/无后台">
+    <title>PicMark</title>
+    <link rel="stylesheet" href="./static/mdui-v1.0.2/css/mdui.min.css">
+    <script src="./static/util/util.js"></script>
+    <script src="./static/mdui-v1.0.2/js/mdui.min.js"></script>
+    <script type="text/javascript">
+        const $ = mdui.$
+        $.ajaxSetup({
+            error: function (xhr, textStatus) {
+                // xhr 为 XMLHttpRequest 对象
+                // textStatus 为包含错误代码的字符串
+                mdui.snackbar(xhr.responseText, {position: 'top'})
+            }
+        })
+    </script>
+    <script src="./static/api/api-github.js"></script>
+</head>
+<body class="mdui-color-blue-50">
+<div class="mdui-container mdui-p-t-1 mdui-p-b-1">
+    <div class="mdui-typo">
+        <h3><strong>PicMark</strong> <small>无后台 全开源</small></h3>
+    </div>
+    <form id="github-form">
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <label class="mdui-textfield-label">Github Token (repo/*)</label>
+            <input name="token" class="mdui-textfield-input" type="text" required/>
+            <div class="mdui-textfield-error">请填写GithubToken</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <label class="mdui-textfield-label">Github用户名</label>
+            <input name="owner" class="mdui-textfield-input" type="text" required/>
+            <div class="mdui-textfield-error">请填写Github用户名</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <label class="mdui-textfield-label">Github仓库名 (public)</label>
+            <input name="repo" class="mdui-textfield-input" type="text" required/>
+            <div class="mdui-textfield-error">请填写Github仓库名</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <label class="mdui-textfield-label">Github仓库分支</label>
+            <input name="branch" class="mdui-textfield-input" type="text" value="main" required/>
+            <div class="mdui-textfield-error">请填写Github仓库分支</div>
+        </div>
+    </form>
+    <button class="mdui-btn mdui-btn-block mdui-color-blue-100" onclick="clickGetFileInput()">选择文件并上传</button>
+    <input id="get-file-input" style="display: none" type="file" accept="image/*"/>
+
+    <br/>
+    <div id="pic-view"></div>
+
+    <br/>
+    <div id="pic-url" class="mdui-typo"></div>
+
+    <!--<div class="mdui-valign mdui-color-blue-100" style="height: 300px; border-radius: 10px">-->
+    <!--    <div class="mdui-center mdui-textfield mdui-textfield-floating-label">-->
+    <!--        <label class="mdui-textfield-label">Github Token 包含权限(repo/*) 无后台 全开源</label>-->
+    <!--        <input class="mdui-textfield-input" type="text"/>-->
+    <!--    </div>-->
+    <!--    <div class="mdui-center">-->
+    <!--        <button class="mdui-btn mdui-btn-icon" style="width: 96px; height: 96px"-->
+    <!--                onclick="clickGetFileInput()">-->
+    <!--            <i class="mdui-icon material-icons">add</i>-->
+    <!--        </button>-->
+    <!--        <input id="get-file-input" style="display: none" type="file" accept="image/*"/>-->
+    <!--    </div>-->
+    <!--</div>-->
+
+    <br/>
+    <div class="mdui-bottom-nav">
+        <a class="mdui-btn" href="https://github.com/picmark/picmark.github.io">访问源码</a>
+    </div>
+
+</div>
+<script type="text/javascript">
+    let picViewDiv = $('#pic-view')
+    let picUrlDiv = $('#pic-url')
+    let getFileInput = $('#get-file-input')
+    let githubForm = $('#github-form')
+
+    function clickGetFileInput() {
+        getFileInput.trigger('click')
+    }
+
+    getFileInput.on('change', async function (e) {
+        try {
+            const file = e.target.files[0]
+            if (!file) {
+                return
+            }
+
+            let githubData = {}
+            githubForm.serializeArray().forEach((item, index) => {
+                githubData[item.name] = item.value
+            })
+            console.log(githubData)
+
+            if (!githubData.token) {
+                mdui.snackbar('请填入GithubToken', {position: 'top'})
+                return
+            }
+            if (!githubData.owner) {
+                mdui.snackbar('请填入Github用户名', {position: 'top'})
+                return
+            }
+            if (!githubData.repo) {
+                mdui.snackbar('请填入Github仓库名', {position: 'top'})
+                return
+            }
+
+            const fileBase64 = await fileToBase64(file)
+            const res = await uploadToGithub(
+                githubData.token,
+                githubData.owner,
+                githubData.repo,
+                githubData.branch,
+                file.name,
+                fileBase64
+            )
+            if (!res) {
+                mdui.snackbar('上传失败', {position: 'top'})
+                return
+            }
+
+            if (res && res.github) {
+                picViewDiv.empty()
+                picViewDiv.append(`<img class="mdui-img-fluid mdui-img-rounded" src="${res.jsdelivr}"/>`)
+                picUrlDiv.empty()
+                picUrlDiv.append(`<p>Github: <a href="${res.github}">${res.github}</a></p>`)
+                picUrlDiv.append(`<p>JsDelivr: <a href="${res.jsdelivr}">${res.jsdelivr}</a></p>`)
+            }
+            console.log(res)
+        } finally {
+            getFileInput.val(null)
+        }
+    });
+</script>
+</body>
+</html>
