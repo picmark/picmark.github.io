@@ -83,6 +83,15 @@
     let getFileInput = $('#get-file-input')
     let githubForm = $('#github-form')
 
+    const githubStoreKey = 'picmark_github_info'
+    let githubInfo = get(githubStoreKey)
+    if (githubInfo) {
+        githubForm.find('input[name="token"]').val(githubInfo.token)
+        githubForm.find('input[name="owner"]').val(githubInfo.owner)
+        githubForm.find('input[name="repo"]').val(githubInfo.repo)
+        githubForm.find('input[name="branch"]').val(githubInfo.branch)
+    }
+
     function clickGetFileInput() {
         getFileInput.trigger('click')
     }
@@ -94,31 +103,37 @@
                 return
             }
 
-            let githubData = {}
+            let githubInfo = {}
             githubForm.serializeArray().forEach((item, index) => {
-                githubData[item.name] = item.value
+                githubInfo[item.name] = item.value
             })
-            console.log(githubData)
+            console.log(githubInfo)
 
-            if (!githubData.token) {
+            if (!githubInfo.token) {
                 mdui.snackbar('请填入GithubToken', {position: 'top'})
                 return
             }
-            if (!githubData.owner) {
+            if (!githubInfo.owner) {
                 mdui.snackbar('请填入Github用户名', {position: 'top'})
                 return
             }
-            if (!githubData.repo) {
+            if (!githubInfo.repo) {
                 mdui.snackbar('请填入Github仓库名', {position: 'top'})
                 return
             }
+            if (!githubInfo.branch) {
+                mdui.snackbar('请填入Github仓库分支', {position: 'top'})
+                return
+            }
+
+            set(githubStoreKey, githubInfo)
 
             const fileBase64 = await fileToBase64(file)
             const res = await uploadToGithub(
-                githubData.token,
-                githubData.owner,
-                githubData.repo,
-                githubData.branch,
+                githubInfo.token,
+                githubInfo.owner,
+                githubInfo.repo,
+                githubInfo.branch,
                 file.name,
                 fileBase64
             )
@@ -131,9 +146,20 @@
                 picViewDiv.empty()
                 picViewDiv.append(`<img class="mdui-img-fluid mdui-img-rounded" src="${res.jsdelivr}"/>`)
                 picUrlDiv.empty()
-                picUrlDiv.append(`<p>Github: <a href="${res.github}" target="_blank">${res.github}</a></p>`)
-                picUrlDiv.append(`<p>JsDelivr: <a href="${res.jsdelivr}" target="_blank">${res.jsdelivr}</a></p>`)
+                picUrlDiv.append(`<p>
+                    Github: <a href="${res.github}" target="_blank">${res.github}</a>
+                    <button class="mdui-btn mdui-btn-icon" onclick="copyToClipboard('${res.github}')">
+                        <i class="mdui-icon material-icons">content_copy</i>
+                    </button>
+                    </p>`)
+                picUrlDiv.append(`<p>
+                    Github: <a href="${res.jsdelivr}" target="_blank">${res.jsdelivr}</a>
+                    <button class="mdui-btn mdui-btn-icon" onclick="copyToClipboard('${res.jsdelivr}')">
+                        <i class="mdui-icon material-icons">content_copy</i>
+                    </button>
+                    </p>`)
             }
+            mdui.snackbar('上传成功', {position: 'top'})
             console.log(res)
         } finally {
             getFileInput.val(null)
