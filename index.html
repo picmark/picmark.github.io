@@ -107,7 +107,7 @@
             githubForm.serializeArray().forEach((item, index) => {
                 githubInfo[item.name] = item.value
             })
-            console.log(githubInfo)
+            // console.log(githubInfo)
 
             if (!githubInfo.token) {
                 mdui.snackbar('请填入GithubToken', {position: 'top'})
@@ -160,7 +160,7 @@
                     </p>`)
             }
             mdui.snackbar('上传成功', {position: 'top'})
-            console.log(res)
+            // console.log(res)
         } catch (e) {
             mdui.snackbar(e.message, {position: 'top'})
         } finally {
