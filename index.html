@@ -83,6 +83,7 @@
     let getFileInput = $('#get-file-input')
     let githubForm = $('#github-form')
 
+    // 回填表单
     const githubStoreKey = 'picmark_github_info'
     let githubInfo = get(githubStoreKey)
     if (githubInfo) {
@@ -90,6 +91,13 @@
         githubForm.find('input[name="owner"]').val(githubInfo.owner)
         githubForm.find('input[name="repo"]').val(githubInfo.repo)
         githubForm.find('input[name="branch"]').val(githubInfo.branch)
+    }
+
+    // 回填上次上传内容
+    const lasResStoreKey = 'picmark_last_res'
+    let lastRes = get(lasResStoreKey)
+    if (lastRes) {
+        renderRes(lastRes)
     }
 
     function clickGetFileInput() {
@@ -143,21 +151,8 @@
             }
 
             if (res && res.github) {
-                picViewDiv.empty()
-                picViewDiv.append(`<img class="mdui-img-fluid mdui-img-rounded" src="${res.jsdelivr}"/>`)
-                picUrlDiv.empty()
-                picUrlDiv.append(`<p>
-                    Github: <a href="${res.github}" target="_blank">${res.github}</a>
-                    <button class="mdui-btn mdui-btn-icon" onclick="copyToClipboard('${res.github}')">
-                        <i class="mdui-icon material-icons">content_copy</i>
-                    </button>
-                    </p>`)
-                picUrlDiv.append(`<p>
-                    Github: <a href="${res.jsdelivr}" target="_blank">${res.jsdelivr}</a>
-                    <button class="mdui-btn mdui-btn-icon" onclick="copyToClipboard('${res.jsdelivr}')">
-                        <i class="mdui-icon material-icons">content_copy</i>
-                    </button>
-                    </p>`)
+                set(lasResStoreKey, res)
+                renderRes(res)
             }
             mdui.snackbar('上传成功', {position: 'top'})
             // console.log(res)
@@ -167,6 +162,24 @@
             getFileInput.val(null)
         }
     });
+
+    function renderRes(res) {
+        picViewDiv.empty()
+        picViewDiv.append(`<img class="mdui-img-fluid mdui-img-rounded" src="${res.jsdelivr}"/>`)
+        picUrlDiv.empty()
+        picUrlDiv.append(`<p>
+                    Github: <a href="${res.github}" target="_blank">${res.github}</a>
+                    <button class="mdui-btn mdui-btn-icon" onclick="copyToClipboard('${res.github}')">
+                        <i class="mdui-icon material-icons">content_copy</i>
+                    </button>
+                    </p>`)
+        picUrlDiv.append(`<p>
+                    JsDelivr: <a href="${res.jsdelivr}" target="_blank">${res.jsdelivr}</a>
+                    <button class="mdui-btn mdui-btn-icon" onclick="copyToClipboard('${res.jsdelivr}')">
+                        <i class="mdui-icon material-icons">content_copy</i>
+                    </button>
+                    </p>`)
+    }
 </script>
 </body>
 </html>
