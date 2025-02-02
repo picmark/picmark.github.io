@@ -161,6 +161,8 @@
             }
             mdui.snackbar('上传成功', {position: 'top'})
             console.log(res)
+        } catch (e) {
+            mdui.snackbar(e.message, {position: 'top'})
         } finally {
             getFileInput.val(null)
         }
